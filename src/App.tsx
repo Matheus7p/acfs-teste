@@ -1,9 +1,10 @@
-function App() {
+export default function App() {
   return (
     <>
-      <h1 className="text-red-400">Teste tecnico</h1>
+      <main className="h-screen bg-blue-200">
+        <h1>Teste tecnico</h1>
+      </main>
     </>
   )
 }
 
-export default App
