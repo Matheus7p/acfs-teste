@@ -50,6 +50,7 @@ export default tseslint.config(
           alwaysTryTypes: true,
           project: ["./tsconfig.json", "./tsconfig.app.json"],
         },
+        "node": true
       },
     },
     rules: {

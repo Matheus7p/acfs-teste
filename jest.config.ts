@@ -11,6 +11,8 @@ const config = {
     "!src/main.tsx",
     "!src/**/*.response.ts",
     "!src/**/*.enum.ts",
+    "!src/env.mjs",
+    "!src/route.tsx",
   ],
 
   coverageThreshold: {
@@ -24,13 +26,13 @@ const config = {
 
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
 
-  moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/src/$1",
+  transform: {
+    "^.+\\.(ts|tsx|js|jsx|mjs)$": "ts-jest",
   },
 
-  transform: {
-    "^.+\\.(ts|tsx)$": "ts-jest",
-  },
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/src/$1",
+  }, 
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
 
   transformIgnorePatterns: [

@@ -90,15 +90,11 @@ def universal_swap_fix(df):
 
 def perform_full_cleaning(df):
     df = find_real_header(df)
-    
-    df = df.replace(r'^\s*$', np.nan, regex=True)
-    df = df.dropna(how='all').reset_index(drop=True)
+    df = df.dropna(how='all', axis=1)
 
     meta = discover_column_types(df)
 
-    for col in df.columns:
-        dtype = meta.get(col)
-        
+    for col, dtype in meta.items():
         if dtype == "numeric":
             df[col] = df[col].astype(str).str.replace(r'[R\$\s]', '', regex=True)
             df[col] = df[col].str.replace('.', '', regex=False).str.replace(',', '.', regex=False)
@@ -106,8 +102,11 @@ def perform_full_cleaning(df):
         elif dtype == "temporal":
             df[col] = pd.to_datetime(df[col], errors='coerce')
         else:
-            df[col] = df[col].astype(str).replace(['nan', 'None'], '').str.strip()
-            
+            df[col] = df[col].astype(str).str.strip()
+            df[col] = df[col].replace(['nan', 'None', 'NaT', ''], np.nan)
+
+    df = df.dropna(how='any').reset_index(drop=True)
+
     return df, meta
 
 
