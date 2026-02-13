@@ -7,6 +7,7 @@ import os
 import uuid
 from dotenv import load_dotenv
 from supabase import create_client, Client
+import unicodedata
 
 load_dotenv()
 
@@ -22,6 +23,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+def normalize_string(s):
+    if not isinstance(s, str):
+        return s
+    s = unicodedata.normalize('NFKD', s).encode('ascii', 'ignore').decode('utf-8')
+    return s.strip().upper()
 
 def find_real_header(df_raw):
     df_raw = df_raw.dropna(how='all', axis=1)
@@ -102,8 +109,8 @@ def perform_full_cleaning(df):
         elif dtype == "temporal":
             df[col] = pd.to_datetime(df[col], errors='coerce')
         else:
-            df[col] = df[col].astype(str).str.strip()
-            df[col] = df[col].replace(['nan', 'None', 'NaT', ''], np.nan)
+            df[col] = df[col].apply(normalize_string)
+            df[col] = df[col].replace(['NAN', 'NONE', 'NAT', ''], np.nan)
 
     df = df.dropna(how='any').reset_index(drop=True)
 
