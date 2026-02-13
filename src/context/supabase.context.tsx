@@ -58,7 +58,7 @@ export const SupabaseProvider = ({ children }: IProviderProps): JSX.Element => {
         setUploads(data as IDashboardData[]);
       }
     } catch (err) {
-      console.error("Erro ao buscar uploads:", err);
+      console.error("Error fetching uploads:", err);
     } finally {
       setLoading(false);
     }

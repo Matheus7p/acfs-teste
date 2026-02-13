@@ -52,7 +52,7 @@ export const useFileUpload = (): IUseFileUploadReturn => {
           setErrorMessage(response.data.message);
         }
       } catch (error) {
-        console.error("Erro no upload:", error);
+        console.error("Upload error:", error);
         setErrorMessage("Falha ao processar o arquivo. Tente novamente.");
       } finally {
         setIsUploading(false);
