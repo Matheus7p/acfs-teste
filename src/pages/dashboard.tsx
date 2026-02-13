@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { Sidebar } from "@/components/sidebar.component";
 import { StatCard } from "@/components/ui/stat-card.ui";
 import { useSupabase } from "@/context/supabase.context";
-import { calculateDashboardStats } from "@/utils/calculateMetrics.utils";
+import { useDashboardMetrics } from "@/hooks/use-dashboard-metrics";
 import { formatBRL } from "@/utils/formatBRL.utils";
 
 export const DashboardPage = (): JSX.Element => {
@@ -14,8 +14,11 @@ export const DashboardPage = (): JSX.Element => {
   useEffect(() => {
     if (fileId && uploads.length > 0) selectUpload(fileId);
   }, [fileId, uploads, selectUpload]);
-
-  const stats = calculateDashboardStats(currentData?.rows || [], currentData?.metadata || {});
+  
+  const { totalRevenue, orderCount, averageTicket } = useDashboardMetrics(
+    currentData?.rows || [], 
+    currentData?.metadata || {},
+  );
 
   return (
     <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
@@ -30,16 +33,16 @@ export const DashboardPage = (): JSX.Element => {
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto mb-12">
           <StatCard 
             title="Receita Total" 
-            value={formatBRL(stats.totalRevenue)} 
+            value={formatBRL(totalRevenue)} 
             colorClass="text-green-600" 
           />
           <StatCard 
             title="Pedidos" 
-            value={stats.orderCount.toLocaleString("pt-BR")} 
+            value={orderCount.toLocaleString("pt-BR")} 
           />
           <StatCard 
             title="Ticket Médio" 
-            value={formatBRL(stats.averageTicket)} 
+            value={formatBRL(averageTicket)} 
             colorClass="text-blue-600" 
           />
         </section>
