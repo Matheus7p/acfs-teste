@@ -1,11 +1,14 @@
-import { JSX, useEffect } from "react";
+import { JSX, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 
 import { Sidebar } from "@/components/sidebar.component";
+import { PieChartCard } from "@/components/ui/pie-chart-card.ui";
 import { StatCard } from "@/components/ui/stat-card.ui";
 import { useSupabase } from "@/context/supabase.context";
 import { useDashboardMetrics } from "@/hooks/use-dashboard-metrics";
+import { aggregateDataByKey } from "@/utils/chart-data.utils";
 import { formatBRL } from "@/utils/formatBRL.utils";
+
 
 export const DashboardPage = (): JSX.Element => {
   const { fileId } = useParams<{ fileId: string }>();
@@ -15,10 +18,19 @@ export const DashboardPage = (): JSX.Element => {
     if (fileId && uploads.length > 0) selectUpload(fileId);
   }, [fileId, uploads, selectUpload]);
   
-  const { totalRevenue, orderCount, averageTicket } = useDashboardMetrics(
+  const { totalRevenue, orderCount, averageTicket, valueKey, categoryKey } = useDashboardMetrics(
     currentData?.rows || [], 
     currentData?.metadata || {},
   );
+
+  const rows = currentData?.rows;
+
+  const chartData = useMemo(() => {
+    if (!rows || !categoryKey || !valueKey) return [];
+  
+    return aggregateDataByKey(rows, categoryKey, valueKey);
+  
+  }, [rows, categoryKey, valueKey]);
 
   return (
     <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
@@ -46,7 +58,14 @@ export const DashboardPage = (): JSX.Element => {
             colorClass="text-blue-600" 
           />
         </section>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-6xl mx-auto">
+          {chartData.length > 0 && (
+            <PieChartCard 
+              title={`Distribuição por ${categoryKey}`} 
+              data={chartData} 
+            />
+          )}
+        </div>
       </main>
     </div>
   );
