@@ -1,6 +1,7 @@
 {
-  "esModuleInterop": true,
   "compilerOptions": {
+    "allowJs": true,
+    "esModuleInterop": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
