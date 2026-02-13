@@ -1,0 +1,12 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../api:/app/api
+    environment:
+      - PYTHONUNBUFFERED=1
