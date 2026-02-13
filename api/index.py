@@ -4,6 +4,7 @@ import pandas as pd
 import io
 import numpy as np
 import os
+import uuid
 from dotenv import load_dotenv
 from supabase import create_client, Client
 
@@ -21,6 +22,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+def find_real_header(df_raw):
+    df_raw = df_raw.dropna(how='all', axis=1)
+    
+    if any("Unnamed" in str(col) for col in df_raw.columns):
+        for i, row in df_raw.iterrows():
+            if row.notnull().sum() >= 2:
+                new_header = row.values
+                new_header = [str(h).strip() if pd.notnull(h) else f"col_{idx}" for idx, h in enumerate(new_header)]
+                df_raw.columns = new_header
+                df_raw = df_raw.iloc[i+1:].reset_index(drop=True)
+                break
+    
+    df_raw.columns = [str(c).strip() for c in df_raw.columns]
+    return df_raw
 
 def discover_column_types(df):
     column_metadata = {}
@@ -73,32 +89,34 @@ def universal_swap_fix(df):
     return df
 
 def perform_full_cleaning(df):
+    df = find_real_header(df)
+    
     df = df.replace(r'^\s*$', np.nan, regex=True)
-    df = df.dropna(how='any')
+    df = df.dropna(how='all').reset_index(drop=True)
 
-    df = universal_swap_fix(df)
     meta = discover_column_types(df)
 
-    for col, dtype in meta.items():
+    for col in df.columns:
+        dtype = meta.get(col)
+        
         if dtype == "numeric":
             df[col] = df[col].astype(str).str.replace(r'[R\$\s]', '', regex=True)
             df[col] = df[col].str.replace('.', '', regex=False).str.replace(',', '.', regex=False)
             df[col] = pd.to_numeric(df[col], errors='coerce')
         elif dtype == "temporal":
-            df[col] = pd.to_datetime(df[col], errors='coerce').dt.date
+            df[col] = pd.to_datetime(df[col], errors='coerce')
         else:
-            df[col] = df[col].astype(str).str.strip()
-            if col.lower() == "categoria":
-                df[col] = df[col].str.upper()
-
-    df = df.dropna(how='any')
+            df[col] = df[col].astype(str).replace(['nan', 'None'], '').str.strip()
+            
     return df, meta
+
 
 @app.post("/api/process")
 async def process_data(file: UploadFile = File(...)):
     try:
         contents = await file.read()
-        df_raw = pd.read_excel(io.BytesIO(contents), engine='openpyxl')
+        df_raw = pd.read_excel(io.BytesIO(contents), engine='openpyxl', header=0)
+        
         df, meta = perform_full_cleaning(df_raw)
         
         res_df = df.copy()
@@ -106,7 +124,7 @@ async def process_data(file: UploadFile = File(...)):
             if meta.get(col) == "temporal":
                 res_df[col] = res_df[col].apply(lambda x: x.strftime('%Y-%m-%d') if pd.notnull(x) else "")
             elif meta.get(col) == "numeric":
-                res_df[col] = pd.to_numeric(res_df[col])
+                res_df[col] = pd.to_numeric(res_df[col]).fillna(0)
             else:
                 res_df[col] = res_df[col].fillna("")
 
@@ -134,6 +152,8 @@ async def process_data(file: UploadFile = File(...)):
         }
 
     except Exception as e:
+        import traceback
+        print(traceback.format_exc())
         return {"status": "error", "message": str(e)}
 
 if __name__ == "__main__":
