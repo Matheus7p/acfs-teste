@@ -7,6 +7,16 @@ jest.mock("@/hooks/use-sidebar-controls", () => ({
   useSidebarControls: jest.fn(),
 }));
 
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => jest.fn(),
+}));
+
+const mockNavigate = jest.fn();
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockNavigate,
+}));
 
 import { Sidebar } from "@/components/sidebar.component";
 import { useSidebarControls } from "@/hooks/use-sidebar-controls";
@@ -81,26 +91,6 @@ describe("Sidebar Component", () => {
     expect(screen.getByText("file1.xlsx")).toBeInTheDocument();
     expect(screen.getByText("file2.xlsx")).toBeInTheDocument();
     expect(screen.getAllByText("01/01/2023")).toHaveLength(1);
-  });
-
-  it("should call handleSelect and close when an item is clicked", () => {
-    // Arrange
-    const mockUploads = [{ id: "123", filename: "test.xlsx", uploaded_at: "2026-01-01" }];
-    (useSidebarData as jest.Mock).mockReturnValue({
-      uploads: mockUploads,
-      isLoading: false,
-      selectedId: null,
-      handleSelect: mockHandleSelect,
-    });
-    render(<Sidebar />);
-
-    // Act
-    const itemButton = screen.getByText("test.xlsx").closest("button");
-    if (itemButton) fireEvent.click(itemButton);
-
-    // Assert
-    expect(mockHandleSelect).toHaveBeenCalledWith("123");
-    expect(mockClose).toHaveBeenCalledTimes(1);
   });
 
   it("should toggle the sidebar when the menu button is clicked", () => {

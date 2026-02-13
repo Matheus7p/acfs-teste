@@ -17,6 +17,11 @@ jest.mock("@/env.mjs", () => ({
   env: { VITE_API_URL: "http://localhost:3000" },
 }));
 
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => jest.fn(),
+}));
+
 describe("useFileUpload", () => {
   const addUploadMock = jest.fn();
   const mockFile = new File(["content"], "test.csv", { type: "text/csv" });

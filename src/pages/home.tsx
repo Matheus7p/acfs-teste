@@ -1,11 +1,11 @@
 import { JSX } from "react";
 
+
+import { FileUploader } from "@/components/file-uploader.component";
+import { Sidebar } from "@/components/sidebar.component";
 import { useSupabase } from "@/context/supabase.context";
 
-import { FileUploader } from "./components/file-uploader.component";
-import { Sidebar } from "./components/sidebar.component";
-
-export function App (): JSX.Element {
+export function Home (): JSX.Element {
   const { currentData } = useSupabase();
 
   return (
