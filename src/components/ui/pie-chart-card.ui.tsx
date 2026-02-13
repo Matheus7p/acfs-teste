@@ -12,10 +12,10 @@ interface IPieChartProps {
 
 export const PieChartCard = ({ title, data }: IPieChartProps): JSX.Element => {
   return (
-    <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200 h-100 flex flex-col">
+    <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col min-w-0 h-full">
       <h3 className="text-slate-600 font-bold mb-4">{title}</h3>
       <div className="flex-1 min-h-0">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="90%" height="90%">
           <PieChart>
             <Pie
               data={data}

@@ -2,11 +2,12 @@ import { JSX, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 
 import { Sidebar } from "@/components/sidebar.component";
+import { BarChartCard } from "@/components/ui/bar-char-card.ui";
 import { PieChartCard } from "@/components/ui/pie-chart-card.ui";
 import { StatCard } from "@/components/ui/stat-card.ui";
 import { useSupabase } from "@/context/supabase.context";
 import { useDashboardMetrics } from "@/hooks/use-dashboard-metrics";
-import { aggregateDataByKey } from "@/utils/chart-data.utils";
+import { aggregateByMonthColumn, aggregateDataByKey } from "@/utils/chart-data.utils";
 import { formatBRL } from "@/utils/formatBRL.utils";
 
 
@@ -31,6 +32,13 @@ export const DashboardPage = (): JSX.Element => {
     return aggregateDataByKey(rows, categoryKey, valueKey);
   
   }, [rows, categoryKey, valueKey]);
+
+  const barData = useMemo(() => {
+    if (!rows || !valueKey) return [];
+  
+    return aggregateByMonthColumn(rows, valueKey);
+  
+  }, [rows, valueKey]);
 
   return (
     <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
@@ -58,14 +66,27 @@ export const DashboardPage = (): JSX.Element => {
             colorClass="text-blue-600" 
           />
         </section>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-6xl mx-auto">
-          {chartData.length > 0 && (
-            <PieChartCard 
-              title={`Distribuição por ${categoryKey}`} 
-              data={chartData} 
-            />
-          )}
-        </div>
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-6xl mx-auto mb-8">
+  
+          <div className="h-114 flex flex-col">
+            {chartData.length > 0 && (
+              <PieChartCard 
+                title={`Distribuição por ${categoryKey}`} 
+                data={chartData} 
+              />
+            )}
+          </div>
+
+          <div className="h-114 flex flex-col">
+            {barData.length > 0 && (
+              <BarChartCard 
+                title="Faturamento Mensal" 
+                data={barData} 
+              />
+            )}
+          </div>
+
+        </section>
       </main>
     </div>
   );
