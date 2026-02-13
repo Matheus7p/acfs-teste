@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 
-import { useSupabase, type IDashboardData } from "@/context/supabase.context";
+import { useSupabase } from "@/context/supabase.context";
+import { IDashboardData } from "@/types/dashboard-data.type";
 
 interface IUseSidebarReturn {
   uploads: IDashboardData[];
