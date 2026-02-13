@@ -10,6 +10,8 @@ lerna-debug.log*
 # testing
 /coverage
 
+__pycache__/
+*.py[cod]
 
 node_modules
 dist
