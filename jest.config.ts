@@ -11,6 +11,7 @@ const config = {
     "!src/main.tsx",
     "!src/**/*.response.ts",
     "!src/**/*.enum.ts",
+    "!src/env.mjs",
   ],
 
   coverageThreshold: {
