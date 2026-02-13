@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { useSupabase } from "@/context/supabase.context";
 import { env } from "@/env.mjs";
@@ -22,7 +23,8 @@ export const useFileUpload = (): IUseFileUploadReturn => {
   const { addUpload } = useSupabase();
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+  const navigate = useNavigate();
+  
   const uploadFile = useCallback(
     async (file: File): Promise<undefined> => {
       setIsUploading(true);
@@ -41,13 +43,15 @@ export const useFileUpload = (): IUseFileUploadReturn => {
         );
 
         if (response.data.status === "success") {
+          const newId = response.data.db_id;
           addUpload({
-            id: response.data.db_id,
+            id: newId,
             filename: file.name,
             metadata: response.data.metadata,
             rows: response.data.data,
             uploaded_at: new Date().toISOString(),
           });
+          void navigate(`/dashboard/${newId}`);
         } else {
           setErrorMessage(response.data.message);
         }
@@ -60,7 +64,7 @@ export const useFileUpload = (): IUseFileUploadReturn => {
       
       return undefined;
     },
-    [addUpload],
+    [addUpload, navigate],
   );
 
   return { 

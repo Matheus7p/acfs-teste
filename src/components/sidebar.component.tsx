@@ -1,15 +1,17 @@
 import { FileText, Loader2, Menu, X, Calendar } from "lucide-react";
 import { JSX } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { useSidebarControls } from "@/hooks/use-sidebar-controls";
 import { useSidebarData } from "@/hooks/use-sidebar-data";
 
 export const Sidebar = (): JSX.Element => {
-  const { uploads, isLoading, selectedId, handleSelect } = useSidebarData();
+  const { uploads, isLoading, selectedId } = useSidebarData();
   const { isOpen, toggle, close } = useSidebarControls();
+  const navigate = useNavigate();
 
   const onSelectFile = (id: string): undefined => {
-    handleSelect(id);
+    void navigate(`/dashboard/${id}`);
     close();
     return undefined;
   };

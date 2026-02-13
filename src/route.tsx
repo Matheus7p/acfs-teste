@@ -1,15 +1,16 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
-import { App } from "./App";
+import { DashboardPage } from "./pages/dashboard";
+import { Home } from "./pages/home";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <Home />,
   },
   {
     path: "/dashboard/:fileId",
-    element: <div>logo logo</div>,
+    element: <DashboardPage />,
   },
   {
     path: "*",
