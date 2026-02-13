@@ -3,8 +3,17 @@ from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import io
 import numpy as np
+import os
+from dotenv import load_dotenv
+from supabase import create_client, Client
+
+load_dotenv()
 
 app = FastAPI()
+
+url: str = os.environ.get("SUPABASE_URL")
+key: str = os.environ.get("SUPABASE_KEY")
+supabase: Client = create_client(url, key)
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,7 +32,7 @@ def discover_column_types(df):
         sample_str = sample.astype(str).str.strip()
         check_num = sample_str.replace(r'[R\$\s]', '', regex=True).str.replace('.', '', regex=False).str.replace(',', '.', regex=False)
         is_numeric = pd.to_numeric(check_num, errors='coerce').notnull().mean() > 0.5
-        is_date = pd.to_datetime(sample, errors='coerce').notnull().mean() > 0.5
+        is_date = pd.to_datetime(sample, errors='coerce', format='mixed').notnull().mean() > 0.5
         
         if is_numeric:
             column_metadata[col] = "numeric"
@@ -100,6 +109,16 @@ async def process_data(file: UploadFile = File(...)):
                 res_df[col] = pd.to_numeric(res_df[col])
             else:
                 res_df[col] = res_df[col].fillna("")
+
+        rows_data = res_df.to_dict(orient="records")
+
+        upload_payload = {
+            "filename": file.filename,
+            "metadata": meta,
+            "rows": rows_data
+        }
+
+        response = supabase.table("dashboard_uploads").insert(upload_payload).execute()
 
         return {"status": "success", "data": res_df.to_dict(orient="records")}
     except Exception as e:
