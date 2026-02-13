@@ -120,7 +120,19 @@ async def process_data(file: UploadFile = File(...)):
 
         response = supabase.table("dashboard_uploads").insert(upload_payload).execute()
 
-        return {"status": "success", "data": res_df.to_dict(orient="records")}
+        if not response.data:
+            raise Exception("The database did not return the entered record.")
+            
+        db_id = str(response.data[0].get("id"))
+
+        return {
+            "status": "success", 
+            "db_id": db_id, 
+            "data": rows_data, 
+            "metadata": meta,
+            "message": "Data processed and saved successfully"
+        }
+
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
