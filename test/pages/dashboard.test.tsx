@@ -70,7 +70,10 @@ describe("DashboardPage", () => {
     expect(screen.getByText("Pedidos")).toBeInTheDocument();
     expect(screen.getByText("3")).toBeInTheDocument();
     expect(screen.getByText("Ticket Médio")).toBeInTheDocument();
-    expect(screen.getByText(/R\$.*200,00/)).toBeInTheDocument();
+    const ticketMedioValue = screen.getAllByText(/R\$.*200,00/).find(el => 
+      el.classList.contains("text-blue-600"),
+    );
+    expect(ticketMedioValue).toBeInTheDocument();
   });
 
   it("should call selectUpload when fileId is present and uploads are loaded", () => {

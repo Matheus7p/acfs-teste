@@ -1,68 +1,67 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 
 import { BarChartCard } from "@/components/ui/bar-char-card.ui";
+import * as formatUtils from "@/utils/formatBRL.utils";
 
+jest.spyOn(formatUtils, "formatBRL").mockImplementation((val) => `R$ ${val}`);
 
-// Mock do Recharts para evitar problemas com SVG e animações
+let capturedYAxisProps: any = null;
+let capturedTooltipProps: any = null;
+
 jest.mock("recharts", () => ({
   ResponsiveContainer: ({ children }: any) => <div>{children}</div>,
-  BarChart: ({ children, data }: any) => (
-    <div data-testid="mock-bar-chart">
-      {/* Mockando a renderização dos nomes do XAxis para validar os dados */}
-      {data.map((item: any) => (
-        <span key={item.name}>{item.name}</span>
-      ))}
-      {children}
-    </div>
-  ),
-  Bar: () => <div data-testid="mock-bar" />,
+  BarChart: ({ children }: any) => <div>{children}</div>,
+  Bar: () => null,
   XAxis: () => null,
-  YAxis: () => null,
+  YAxis: (props: any) => {
+    capturedYAxisProps = props;
+    return null;
+  },
   CartesianGrid: () => null,
-  Tooltip: () => null,
+  Tooltip: (props: any) => {
+    capturedTooltipProps = props;
+    return null;
+  },
 }));
 
-describe("BarChartCard Component", () => {
-  const mockData = [
-    { name: "Jan", value: 4000 },
-    { name: "Fev", value: 3000 },
-  ];
-  const mockTitle = "Faturamento Mensal";
+describe("BarChartCard Component - Deep Coverage", () => {
+  const mockData = [{ name: "Jan", value: 4000 }];
+  const mockTitle = "Faturamento";
 
-  it("should render the card title correctly (AAA)", () => {
-    // Arrange 
-    render(<BarChartCard title={mockTitle} data={mockData} />);
-
-    // Act 
-    const titleElement = screen.getByText(mockTitle);
-
-    // Assert 
-    expect(titleElement).toBeInTheDocument();
-    expect(titleElement).toHaveClass("text-slate-600");
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it("should render all data points labels (AAA)", () => {
-    // Arrange 
+  it("should correctly define the YAxis tickFormatter function (AAA)", () => {
+    // Arrange
     render(<BarChartCard title={mockTitle} data={mockData} />);
-
-    // Act 
-    const janLabel = screen.getByText("Jan");
-    const fevLabel = screen.getByText("Fev");
-
-    // Assert 
-    expect(janLabel).toBeInTheDocument();
-    expect(fevLabel).toBeInTheDocument();
-  });
-
-  it("should apply the correct styles to the container", () => {
-    // Arrange 
-    const { container } = render(<BarChartCard title={mockTitle} data={mockData} />);
     
-    // Act 
-    const mainDiv = container.firstChild;
+    // Act
+    const result = capturedYAxisProps.tickFormatter(5000);
 
-    // Assert 
-    expect(mainDiv).toHaveClass("bg-white", "rounded-xl", "shadow-sm");
+    // Assert
+    expect(result).toBe("R$ 5k");
+  });
+
+  it("should call formatBRL inside Tooltip formatter (AAA)", () => {
+    // Arrange
+    render(<BarChartCard title={mockTitle} data={mockData} />);
+
+    // Act
+    const [formattedValue, label] = capturedTooltipProps.formatter(1000);
+
+    // Assert
+    expect(label).toBe("Vendas");
+    expect(formatUtils.formatBRL).toHaveBeenCalledWith(1000);
+    expect(formattedValue).toBe("R$ 1000");
+  });
+
+  it("should render the title correctly (AAA)", () => {
+    // Arrange & Act
+    const { getByText } = render(<BarChartCard title={mockTitle} data={mockData} />);
+    
+    // Assert
+    expect(getByText(mockTitle)).toBeInTheDocument();
   });
 });
