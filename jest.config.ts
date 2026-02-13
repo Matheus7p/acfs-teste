@@ -12,6 +12,7 @@ const config = {
     "!src/**/*.response.ts",
     "!src/**/*.enum.ts",
     "!src/env.mjs",
+    "!src/route.tsx",
   ],
 
   coverageThreshold: {

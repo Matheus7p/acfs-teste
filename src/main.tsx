@@ -1,15 +1,16 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { RouterProvider } from "react-router-dom";
 
+import { SupabaseProvider } from "@/context/supabase.context";
+
+import { router } from "./route";
 import "./index.css";
-import { App } from "@/App";
 
-import { SupabaseProvider } from "./context/supabase.context";
-
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
     <SupabaseProvider>
-      <App />
+      <RouterProvider router={router} />
     </SupabaseProvider>
-  </StrictMode>,
+  </React.StrictMode>,
 );
