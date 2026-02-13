@@ -16,7 +16,8 @@ export default tseslint.config(
       "eslint.config.js", 
       "vite.config.ts", 
       "jest.config.ts", 
-      "jest.setup.ts"
+      "jest.setup.ts",
+      "commitlint.config.js"
     ],
   },
   js.configs.recommended,
