@@ -1,4 +1,4 @@
-import { JSX, useMemo, useEffect } from "react";
+import { JSX, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 import { Sidebar } from "@/components/sidebar.component";
@@ -15,9 +15,7 @@ export const DashboardPage = (): JSX.Element => {
     if (fileId && uploads.length > 0) selectUpload(fileId);
   }, [fileId, uploads, selectUpload]);
 
-  const stats = useMemo(() => 
-    calculateDashboardStats(currentData?.rows || [], currentData?.metadata || {}), 
-  [currentData]);
+  const stats = calculateDashboardStats(currentData?.rows || [], currentData?.metadata || {});
 
   return (
     <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
